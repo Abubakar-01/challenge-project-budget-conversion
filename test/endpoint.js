@@ -67,6 +67,7 @@ test('GET /nonexistent should return 404', function (t) {
     t.end()
   })
 })
+
 test('POST /api/project/budget should create project', function (t) {
   const options = {
     method: 'POST',
@@ -128,4 +129,18 @@ test('POST /api/project/budget/currency should convert currency', function (t) {
     t.ok(res.body.success, 'Should return success')
     t.end()
   }).end(JSON.stringify(currencyRequest))
+})
+
+test('DELETE /api/project/budget/:id should delete project', function (t) {
+  const options = {
+    method: 'DELETE',
+    encoding: 'json'
+  }
+
+  servertest(server, '/api/project/budget/99999', options, function (err, res) {
+    t.error(err, 'No error')
+    t.equal(res.statusCode, 200, 'Should return 200')
+    t.ok(res.body.success, 'Should return success')
+    t.end()
+  })
 })
