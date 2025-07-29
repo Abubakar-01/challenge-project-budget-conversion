@@ -82,6 +82,16 @@ test('POST /api/project/budget should create project', function (t) {
   }).end(JSON.stringify(testProject))
 })
 
+test('GET /api/project/budget/:id should return project', function (t) {
+  servertest(server, '/api/project/budget/99999', { encoding: 'json' }, function (err, res) {
+    t.error(err, 'No error')
+    t.equal(res.statusCode, 200, 'Should return 200')
+    t.equal(res.body.projectId, 99999, 'Should return correct project')
+    t.end()
+  })
+})
+
+
 test('POST /api/project/budget/currency should convert currency', function (t) {
   const currencyRequest = {
     year: 2024,
