@@ -48,7 +48,7 @@ test('Database setup', async function (t) {
   } catch (err) {
     t.fail('Database setup failed: ' + err.message)
   }
-    t.end()
+  t.end()
 })
 
 test('GET /api/ok should return 200', function (t) {
@@ -67,6 +67,8 @@ test('GET /nonexistent should return 404', function (t) {
     t.end()
   })
 })
+
+// API Endpoint Tests
 
 test('POST /api/project/budget should create project', function (t) {
   const options = {
@@ -129,6 +131,52 @@ test('POST /api/project/budget/currency should convert currency', function (t) {
     t.ok(res.body.success, 'Should return success')
     t.end()
   }).end(JSON.stringify(currencyRequest))
+})
+
+test('POST /api-conversion should convert to TTD', function (t) {
+  // First create TTD project
+  const ttdProject = {
+    projectId: 88888,
+    projectName: 'Peking roasted duck Chanel',
+    year: 2024,
+    currency: 'EUR',
+    initialBudgetLocal: 300000,
+    budgetUsd: 270000,
+    initialScheduleEstimateMonths: 12,
+    adjustedScheduleEstimateMonths: 11,
+    contingencyRate: 2.8,
+    escalationRate: 3.6,
+    finalBudgetUsd: 285000
+  }
+
+  const createOptions = {
+    method: 'POST',
+    encoding: 'json',
+    headers: { 'Content-Type': 'application/json' }
+  }
+
+  servertest(server, '/api/project/budget', createOptions, function (err, res) {
+    t.error(err, 'No error creating TTD project')
+
+    // Now test TTD conversion
+    const ttdRequest = {
+      projectName: 'Peking roasted duck Chanel',
+      year: 2024
+    }
+
+    const ttdOptions = {
+      method: 'POST',
+      encoding: 'json',
+      headers: { 'Content-Type': 'application/json' }
+    }
+
+    servertest(server, '/api/api-conversion', ttdOptions, function (err, res) {
+      t.error(err, 'No error')
+      t.equal(res.statusCode, 200, 'Should return 200')
+      t.ok(res.body.success, 'Should return success')
+      t.end()
+    }).end(JSON.stringify(ttdRequest))
+  }).end(JSON.stringify(ttdProject))
 })
 
 test('DELETE /api/project/budget/:id should delete project', function (t) {
