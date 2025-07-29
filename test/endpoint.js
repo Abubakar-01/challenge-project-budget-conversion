@@ -91,6 +91,23 @@ test('GET /api/project/budget/:id should return project', function (t) {
   })
 })
 
+test('PUT /api/project/budget/:id should update project', function (t) {
+  const updatedProject = { ...testProject, projectName: 'Updated Project' }
+  delete updatedProject.projectId
+
+  const options = {
+    method: 'PUT',
+    encoding: 'json',
+    headers: { 'Content-Type': 'application/json' }
+  }
+
+  servertest(server, '/api/project/budget/99999', options, function (err, res) {
+    t.error(err, 'No error')
+    t.equal(res.statusCode, 200, 'Should return 200')
+    t.ok(res.body.success, 'Should return success')
+    t.end()
+  }).end(JSON.stringify(updatedProject))
+})
 
 test('POST /api/project/budget/currency should convert currency', function (t) {
   const currencyRequest = {
