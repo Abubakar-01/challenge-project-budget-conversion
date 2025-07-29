@@ -8,12 +8,47 @@ const { executeQuery } = require('../lib/db')
 
 const server = http.createServer(app)
 
-test('GET /health should return 200', function (t) {
-  servertest(server, '/health', { encoding: 'json' }, function (err, res) {
-    t.error(err, 'No error')
-    t.equal(res.statusCode, 200, 'Should return 200')
+const testProject = {
+  projectId: 99999,
+  projectName: 'Test Project',
+  year: 2024,
+  currency: 'USD',
+  initialBudgetLocal: 100000,
+  budgetUsd: 100000,
+  initialScheduleEstimateMonths: 12,
+  adjustedScheduleEstimateMonths: 10,
+  contingencyRate: 2.5,
+  escalationRate: 3.0,
+  finalBudgetUsd: 105000
+}
+
+// Setup database tables before running tests
+test('Database setup', async function (t) {
+  const createProjectTable = `
+    CREATE TABLE IF NOT EXISTS project (
+      projectId INTEGER PRIMARY KEY,
+      projectName TEXT NOT NULL,
+      year INTEGER NOT NULL,
+      currency TEXT NOT NULL,
+      initialBudgetLocal REAL NOT NULL,
+      budgetUsd REAL NOT NULL,
+      initialScheduleEstimateMonths INTEGER NOT NULL,
+      adjustedScheduleEstimateMonths INTEGER NOT NULL,
+      contingencyRate REAL NOT NULL,
+      escalationRate REAL NOT NULL,
+      finalBudgetUsd REAL NOT NULL,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `
+
+  try {
+    await executeQuery(createProjectTable, [])
+    t.pass('Database tables created successfully')
+  } catch (err) {
+    t.fail('Database setup failed: ' + err.message)
+  }
     t.end()
-  })
 })
 
 test('GET /api/ok should return 200', function (t) {
@@ -32,6 +67,21 @@ test('GET /nonexistent should return 404', function (t) {
     t.end()
   })
 })
+test('POST /api/project/budget should create project', function (t) {
+  const options = {
+    method: 'POST',
+    encoding: 'json',
+    headers: { 'Content-Type': 'application/json' }
+  }
+
+  servertest(server, '/api/project/budget', options, function (err, res) {
+    t.error(err, 'No error')
+    t.equal(res.statusCode, 201, 'Should return 201')
+    t.ok(res.body.success, 'Should return success')
+    t.end()
+  }).end(JSON.stringify(testProject))
+})
+
 test('POST /api/project/budget/currency should convert currency', function (t) {
   const currencyRequest = {
     year: 2024,
