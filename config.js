@@ -11,6 +11,7 @@ module.exports = {
     database: process.env.DB_NAME || 'budget'
   },
   currency: {
-    apiKey: process.env.CURRENCY_API_KEY
+    apiKey: process.env.CURRENCY_API_KEY,
+    baseUrl: 'https://v6.exchangerate-api.com/v6'
   }
 }
