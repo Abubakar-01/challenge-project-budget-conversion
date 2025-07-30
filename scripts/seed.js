@@ -1,5 +1,5 @@
 const fs = require('fs')
-const db = require('../lib/db')
+const { db, executeQuery } = require('../lib/db')
 
 const stream = fs.createReadStream('./data/projects.csv')
 
@@ -20,7 +20,7 @@ const createTableSql = `
 `
 let data = ''
 
-db.query(createTableSql, err => {
+executeQuery(createTableSql, err => {
   if (err) return console.error('Error creating table:', err)
   stream.on('data', chunk => {
     data += chunk.toString()
@@ -40,7 +40,7 @@ db.query(createTableSql, err => {
 
       const insertSql = `INSERT INTO project values (${parsedValues.join(',')})`
 
-      db.query(insertSql, err => {
+      executeQuery(insertSql, err => {
         if (err) {
           console.error('Error inserting Project ID:', values[0], err)
           process.exit(1)
